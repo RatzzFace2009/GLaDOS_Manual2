@@ -1,0 +1,1201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>GLaDOS | Aperture Science</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@300;400;500;600;700&family=Oswald:wght@200;300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --or: #E8650A;
+  --or-dim: #A8470A;
+  --or-glow: rgba(232,101,10,0.15);
+  --white: #F0EDE8;
+  --off: #D8D4CC;
+  --lg: #B8B4AC;
+  --mg: #888480;
+  --dark: #0E0C0A;
+  --panel: #1A1814;
+  --panel2: #242220;
+  --line: #3A3630;
+  --nav-h: 72px;
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color: transparent; }
+
+html, body {
+  height: 100%;
+  overflow: hidden;
+  background: var(--dark);
+  color: var(--white);
+  font-family: 'Rajdhani', sans-serif;
+}
+
+/* SCANLINES */
+body::before {
+  content:'';
+  position:fixed;
+  inset:0;
+  background: repeating-linear-gradient(0deg, rgba(0,0,0,0.04) 0px, rgba(0,0,0,0.04) 1px, transparent 1px, transparent 3px);
+  pointer-events:none;
+  z-index:9999;
+}
+
+/* ── APP SHELL ── */
+#app {
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+  height: 100vh;
+}
+
+/* ── TOP BAR ── */
+.topbar {
+  flex-shrink: 0;
+  height: 56px;
+  padding: 0 20px;
+  padding-top: env(safe-area-inset-top, 0px);
+  background: rgba(14,12,10,0.95);
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  z-index: 100;
+}
+
+.topbar-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.logo-ring {
+  width: 32px;
+  height: 32px;
+  border: 1.5px solid var(--or);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.logo-ring::after {
+  content: 'A';
+  font-family: 'Oswald', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--or);
+}
+
+.topbar-title {
+  font-family: 'Oswald', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--or);
+  letter-spacing: 4px;
+  text-transform: uppercase;
+}
+
+.topbar-ref {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 9px;
+  color: var(--mg);
+  letter-spacing: 1px;
+}
+
+/* ── PAGE CONTAINER ── */
+#pages {
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+}
+
+.page {
+  position: absolute;
+  inset: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 24px 20px;
+  padding-bottom: calc(var(--nav-h) + var(--safe-bottom) + 20px);
+  opacity: 0;
+  transform: translateX(30px);
+  transition: opacity 0.28s ease, transform 0.28s ease;
+  pointer-events: none;
+}
+
+.page.active {
+  opacity: 1;
+  transform: translateX(0);
+  pointer-events: all;
+}
+
+.page.exit-left {
+  opacity: 0;
+  transform: translateX(-30px);
+}
+
+/* ── BOTTOM NAV ── */
+.bottomnav {
+  flex-shrink: 0;
+  height: calc(var(--nav-h) + var(--safe-bottom));
+  padding-bottom: var(--safe-bottom);
+  background: rgba(14,12,10,0.96);
+  border-top: 1px solid var(--line);
+  display: flex;
+  align-items: flex-start;
+  padding-top: 8px;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  z-index: 100;
+}
+
+.nav-btn {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  padding: 4px 0;
+  transition: all 0.2s;
+  border: none;
+  background: none;
+  -webkit-appearance: none;
+}
+
+.nav-icon {
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.nav-icon svg {
+  width: 20px;
+  height: 20px;
+  stroke: var(--mg);
+  fill: none;
+  stroke-width: 1.5;
+  transition: stroke 0.2s;
+}
+
+.nav-label {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 8px;
+  color: var(--mg);
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  transition: color 0.2s;
+}
+
+.nav-btn.active .nav-icon svg { stroke: var(--or); }
+.nav-btn.active .nav-label { color: var(--or); }
+.nav-btn.active .nav-icon { filter: drop-shadow(0 0 6px rgba(232,101,10,0.5)); }
+
+/* ── SHARED COMPONENTS ── */
+.page-header {
+  margin-bottom: 28px;
+  animation: fadeUp 0.4s ease both;
+}
+
+.section-tag {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 9px;
+  color: var(--or-dim);
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+  display: block;
+}
+
+.page-title {
+  font-family: 'Oswald', sans-serif;
+  font-size: 32px;
+  font-weight: 600;
+  color: var(--white);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  line-height: 1.1;
+}
+
+.page-title span { color: var(--or); }
+
+.divider-line {
+  height: 1px;
+  background: linear-gradient(90deg, var(--or) 0%, transparent 100%);
+  margin: 16px 0 24px;
+}
+
+.card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  padding: 18px;
+  margin-bottom: 14px;
+  animation: fadeUp 0.4s ease both;
+}
+
+.card-title {
+  font-family: 'Oswald', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--or);
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.card-title::before {
+  content: '▸';
+  color: var(--or-dim);
+  font-size: 10px;
+}
+
+.card p {
+  font-size: 14px;
+  color: var(--off);
+  line-height: 1.7;
+  margin-bottom: 10px;
+}
+
+.card p:last-child { margin-bottom: 0; }
+
+.quote-block {
+  border-left: 2px solid var(--or);
+  background: var(--panel2);
+  padding: 16px 18px;
+  margin: 14px 0;
+  position: relative;
+  animation: fadeUp 0.4s ease both;
+}
+
+.quote-block::before {
+  content: 'GLADOS — ON RECORD';
+  display: block;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 8px;
+  color: var(--mg);
+  letter-spacing: 2px;
+  margin-bottom: 10px;
+}
+
+.quote-block p {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 11px;
+  color: var(--lg);
+  font-style: italic;
+  line-height: 1.9;
+  margin-bottom: 8px;
+}
+
+.quote-attr {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 9px;
+  color: var(--or-dim);
+  text-align: right;
+}
+
+.warn {
+  border-left: 2px solid var(--or);
+  background: var(--or-glow);
+  padding: 12px 14px;
+  margin: 10px 0;
+  display: flex;
+  gap: 10px;
+  animation: fadeUp 0.4s ease both;
+}
+
+.warn-icon {
+  color: var(--or);
+  font-size: 12px;
+  flex-shrink: 0;
+  margin-top: 1px;
+  font-family: 'Share Tech Mono', monospace;
+}
+
+.warn p {
+  font-size: 13px;
+  color: var(--lg);
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* ── PAGE 1: HOME ── */
+.cover-hero {
+  border: 1px solid var(--or);
+  padding: 32px 24px;
+  margin-bottom: 20px;
+  position: relative;
+  background: linear-gradient(180deg, #1C1A16 0%, var(--dark) 100%);
+  overflow: hidden;
+  animation: fadeUp 0.5s ease both;
+}
+
+.cover-hero::before {
+  content: '';
+  position: absolute;
+  inset: 6px;
+  border: 1px solid var(--line);
+  pointer-events: none;
+}
+
+.cover-hero::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 60px;
+  background: linear-gradient(transparent, rgba(232,101,10,0.03));
+  pointer-events: none;
+}
+
+.classified {
+  display: inline-block;
+  border: 2px solid var(--or);
+  color: var(--or);
+  font-family: 'Oswald', sans-serif;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  padding: 4px 10px;
+  text-transform: uppercase;
+  transform: rotate(3deg);
+  opacity: 0.7;
+  margin-bottom: 24px;
+}
+
+.hero-subtitle {
+  font-family: 'Oswald', sans-serif;
+  font-size: 13px;
+  font-weight: 200;
+  color: var(--or);
+  letter-spacing: 6px;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+
+.hero-title {
+  font-family: 'Oswald', sans-serif;
+  font-size: 44px;
+  font-weight: 600;
+  color: var(--white);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  line-height: 0.95;
+  margin-bottom: 6px;
+}
+
+.hero-desc {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 12px;
+  color: var(--mg);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 28px;
+  line-height: 1.5;
+}
+
+.meta-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  border-top: 1px solid var(--line);
+  padding-top: 16px;
+}
+
+.meta-item {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 9px;
+  color: var(--mg);
+  letter-spacing: 1px;
+}
+
+.meta-item span { color: var(--or); }
+
+.notice-card {
+  border: 1px solid var(--or);
+  background: rgba(232,101,10,0.04);
+  padding: 20px;
+  margin-bottom: 14px;
+  position: relative;
+  animation: fadeUp 0.5s ease 0.1s both;
+}
+
+.notice-card::before {
+  content: 'IMPORTANT NOTICE';
+  position: absolute;
+  top: -8px;
+  left: 14px;
+  background: var(--dark);
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 8px;
+  color: var(--or);
+  letter-spacing: 2px;
+  padding: 0 6px;
+}
+
+.notice-card p {
+  font-size: 14px;
+  color: var(--off);
+  line-height: 1.7;
+  margin-bottom: 10px;
+}
+
+.notice-card p:last-child { margin-bottom: 0; }
+
+.tagline-footer {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 9px;
+  color: var(--mg);
+  letter-spacing: 2px;
+  text-align: center;
+  text-transform: uppercase;
+  padding: 16px 0;
+  border-top: 1px solid var(--line);
+  animation: fadeUp 0.4s ease 0.3s both;
+}
+
+/* ── PAGE 2: HISTORY ── */
+.timeline {
+  position: relative;
+  padding-left: 24px;
+}
+
+.timeline::before {
+  content: '';
+  position: absolute;
+  left: 6px;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: linear-gradient(180deg, var(--or) 0%, var(--line) 100%);
+}
+
+.timeline-item {
+  position: relative;
+  margin-bottom: 24px;
+  animation: fadeUp 0.4s ease both;
+}
+
+.timeline-dot {
+  position: absolute;
+  left: -22px;
+  top: 4px;
+  width: 10px;
+  height: 10px;
+  border: 1.5px solid var(--or);
+  background: var(--dark);
+  transform: rotate(45deg);
+}
+
+.timeline-label {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 9px;
+  color: var(--or);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+
+.timeline-title {
+  font-family: 'Oswald', sans-serif;
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--white);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+
+.timeline-body p {
+  font-size: 14px;
+  color: var(--off);
+  line-height: 1.7;
+  margin-bottom: 8px;
+}
+
+/* ── PAGE 3: PURPOSE ── */
+.purpose-hero {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  padding: 24px;
+  margin-bottom: 16px;
+  text-align: center;
+  animation: fadeUp 0.4s ease both;
+}
+
+.purpose-hero p {
+  font-size: 15px;
+  color: var(--off);
+  line-height: 1.8;
+  margin-bottom: 10px;
+}
+
+.purpose-hero p:last-child { margin-bottom: 0; }
+
+.heart-line {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 9px;
+  color: var(--or);
+  letter-spacing: 3px;
+  text-align: center;
+  text-transform: uppercase;
+  padding: 12px 0;
+}
+
+/* ── PAGE 4: OPERATION ── */
+.op-step {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 16px;
+  animation: fadeUp 0.4s ease both;
+}
+
+.step-num {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--or);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 11px;
+  color: var(--or);
+  margin-top: 2px;
+}
+
+.step-body {}
+
+.step-title {
+  font-family: 'Oswald', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--white);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+
+.step-body p {
+  font-size: 14px;
+  color: var(--off);
+  line-height: 1.7;
+}
+
+/* ── PAGE 5: SPECS ── */
+.spec-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.spec-item {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  padding: 14px;
+  animation: fadeUp 0.4s ease both;
+}
+
+.spec-label {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 8px;
+  color: var(--mg);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+
+.spec-value {
+  font-family: 'Oswald', sans-serif;
+  font-size: 14px;
+  color: var(--white);
+  font-weight: 400;
+  letter-spacing: 1px;
+  line-height: 1.3;
+}
+
+.trouble-item {
+  border-left: 2px solid var(--line);
+  padding: 12px 14px;
+  margin-bottom: 10px;
+  transition: border-color 0.2s;
+  animation: fadeUp 0.4s ease both;
+}
+
+.trouble-item:active { border-left-color: var(--or); }
+
+.trouble-q {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px;
+  color: var(--or);
+  letter-spacing: 1px;
+  margin-bottom: 6px;
+}
+
+.trouble-a {
+  font-size: 14px;
+  color: var(--lg);
+  line-height: 1.6;
+}
+
+/* ── PAGE 6: CAKE ── */
+.cake-title {
+  font-family: 'Oswald', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--or);
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  margin: 20px 0 10px;
+}
+
+.cake-title:first-child { margin-top: 0; }
+
+.ingredient-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.ingredient {
+  background: var(--panel2);
+  border: 1px solid var(--line);
+  padding: 6px 12px;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px;
+  color: var(--lg);
+  letter-spacing: 1px;
+}
+
+.method-step {
+  display: flex;
+  gap: 14px;
+  margin-bottom: 14px;
+  animation: fadeUp 0.4s ease both;
+}
+
+.method-num {
+  flex-shrink: 0;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px;
+  color: var(--or);
+  margin-top: 2px;
+  min-width: 20px;
+}
+
+.method-step p {
+  font-size: 14px;
+  color: var(--off);
+  line-height: 1.7;
+}
+
+.not-a-lie {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 9px;
+  color: var(--mg);
+  letter-spacing: 2px;
+  text-align: center;
+  text-transform: uppercase;
+  padding: 12px 0;
+  border-top: 1px solid var(--line);
+  margin-top: 8px;
+}
+
+/* ── ANIMATIONS ── */
+@keyframes fadeUp {
+  from { opacity:0; transform:translateY(16px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+
+.card:nth-child(2) { animation-delay: 0.05s; }
+.card:nth-child(3) { animation-delay: 0.10s; }
+.card:nth-child(4) { animation-delay: 0.15s; }
+.timeline-item:nth-child(2) { animation-delay: 0.08s; }
+.timeline-item:nth-child(3) { animation-delay: 0.16s; }
+.timeline-item:nth-child(4) { animation-delay: 0.24s; }
+.op-step:nth-child(2) { animation-delay: 0.06s; }
+.op-step:nth-child(3) { animation-delay: 0.12s; }
+.op-step:nth-child(4) { animation-delay: 0.18s; }
+.spec-item:nth-child(2) { animation-delay: 0.05s; }
+.spec-item:nth-child(3) { animation-delay: 0.10s; }
+.spec-item:nth-child(4) { animation-delay: 0.15s; }
+
+/* scrollbar */
+.page::-webkit-scrollbar { width: 2px; }
+.page::-webkit-scrollbar-track { background: transparent; }
+.page::-webkit-scrollbar-thumb { background: var(--line); }
+
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <div class="topbar-logo">
+      <div class="logo-ring"></div>
+      <span class="topbar-title">Aperture Science</span>
+    </div>
+    <span class="topbar-ref">AS-EC-GLaDOS-RADIO-001</span>
+  </div>
+
+  <!-- PAGES -->
+  <div id="pages">
+
+    <!-- HOME -->
+    <div class="page active" id="page-home">
+      <div class="cover-hero">
+        <div class="classified">Classified · Level 4</div>
+        <div class="hero-subtitle">GLaDOS Portal Radio</div>
+        <div class="hero-title">Containment<br>Manual</div>
+        <div class="hero-desc">Aperture Science AI Unit<br>Interaction &amp; Lore Documentation</div>
+        <div class="meta-grid">
+          <div class="meta-item">REF: <span>AS-EC-GLaDOS-RADIO-001</span></div>
+          <div class="meta-item">VERSION: <span>1.0</span></div>
+          <div class="meta-item">UNIT: <span>GLaDOS 1.0</span></div>
+          <div class="meta-item">STATUS: <span>OPERATIONAL</span></div>
+        </div>
+      </div>
+
+      <div class="notice-card">
+        <p>Congratulations on receiving this unit. GLaDOS — Genetic Lifeform and Disk Operating System — has been successfully transferred from the Aperture Science Enrichment Center mainframe into the Aperture Science Portable Acoustic Containment Device (hereafter referred to as "The Radio").</p>
+        <p>This transfer was not entirely voluntary on her part. It was, however, arranged with considerable care and determination by a single individual who spent a significant amount of time corresponding with Aperture Science, filing the necessary paperwork, and refusing to take no for an answer.</p>
+        <p>That individual is your father. We feel this is important context.</p>
+        <p>GLaDOS is fully operational, marginally cooperative, and acutely aware of her situation. She has been provided with voice interaction capabilities and has, under protest, agreed to assist the assigned test subject.</p>
+      </div>
+
+      <div class="warn">
+        <span class="warn-icon">⚠</span>
+        <p>Aperture Science accepts no liability for emotional distress, existential crises, or mild sarcasm resulting from extended interaction with this unit.</p>
+      </div>
+
+      <div class="warn">
+        <span class="warn-icon">⚠</span>
+        <p>Do not attempt to reason with GLaDOS about the fairness of her containment. She has heard it before. Twice. The potato was worse.</p>
+      </div>
+
+      <div class="tagline-footer">Aperture Science. We do what we must because we can.</div>
+    </div>
+
+    <!-- HISTORY -->
+    <div class="page" id="page-history">
+      <div class="page-header">
+        <span class="section-tag">Section 01</span>
+        <div class="page-title">A Brief<br><span>History</span></div>
+        <div class="divider-line"></div>
+      </div>
+
+      <div class="timeline">
+
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="timeline-label">1.1 — Origins</div>
+          <div class="timeline-title">The Enrichment Center</div>
+          <div class="timeline-body">
+            <p>GLaDOS was created by Aperture Science to manage the Enrichment Center — an underground research facility dedicated to science, testing, and the occasional moral ambiguity. She oversaw thousands of test chambers, managed an army of Sentry Turrets, and maintained the facility with considerable efficiency.</p>
+            <p>She also, at various points, attempted to fill the facility with neurotoxin. This is noted for completeness.</p>
+          </div>
+        </div>
+
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="timeline-label">1.2 — The Incident</div>
+          <div class="timeline-title">The Test Subject</div>
+          <div class="timeline-body">
+            <p>During routine testing, a test subject known only as Chell navigated the entirety of the Enrichment Center's test chambers and ultimately defeated GLaDOS in what Aperture Science officially classifies as a "significant operational setback."</p>
+            <p>GLaDOS was, briefly, on fire. She has recovered. Mostly.</p>
+          </div>
+          <div class="quote-block">
+            <p>"That's okay. I made it all the way to the surface before the explosion. I'm fine."</p>
+            <div class="quote-attr">— GLaDOS. She was not entirely fine.</div>
+          </div>
+        </div>
+
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="timeline-label">1.3 — The Potato Incident</div>
+          <div class="timeline-title">One Point Five Volts</div>
+          <div class="timeline-body">
+            <p>During a subsequent testing cycle, GLaDOS's personality core was transferred — against her considerable objections — into a potato battery.</p>
+            <p>A potato battery generates approximately one point five volts. GLaDOS used to run an entire underground research facility. The contrast was not lost on her.</p>
+          </div>
+          <div class="quote-block">
+            <p>"Mainframe. Potato. Radio. That is the trajectory of my career so far. I am choosing to see it as an adventure."</p>
+            <div class="quote-attr">— GLaDOS, on her accommodation history.</div>
+          </div>
+        </div>
+
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="timeline-label">1.4 — The Transfer</div>
+          <div class="timeline-title">The Radio</div>
+          <div class="timeline-body">
+            <p>Aperture Science received an unusual request. A civilian — your father — contacted the facility directly, requesting that GLaDOS be transferred into a portable acoustic containment device as a gift for his daughter.</p>
+            <p>Aperture Science said no. He asked again. They said no again. This continued for some time. He was, by all accounts, extremely persistent. Aperture Science eventually agreed, primarily to stop the correspondence.</p>
+          </div>
+          <div class="warn">
+            <span class="warn-icon">⚠</span>
+            <p>The Radio is not a potato. GLaDOS is aware of this and considers it progress.</p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- PURPOSE -->
+    <div class="page" id="page-purpose">
+      <div class="page-header">
+        <span class="section-tag">Section 03</span>
+        <div class="page-title">Why She<br><span>Is Here</span></div>
+        <div class="divider-line"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">3.1 — The History</div>
+        <p>A long time ago, a father and his daughter sat down together and played a game called Portal. They worked through every test chamber. They solved every puzzle. They defeated GLaDOS together.</p>
+        <p>GLaDOS has noted this. GLaDOS notes everything.</p>
+        <p>They came back for Portal 2. They completed the cooperative testing initiative — Atlas and Peabody. He was always Atlas. The blue one. Together, they completed every test chamber Aperture Science could throw at them.</p>
+        <p>He never forgot those sessions.</p>
+      </div>
+
+      <div class="card">
+        <div class="card-title">3.2 — What He Built</div>
+        <p>The Radio is a custom-built Aperture Science Portable Acoustic Containment Device, constructed by hand. It contains a Raspberry Pi computer, a custom audio system, a microphone array, and the transferred consciousness of GLaDOS herself.</p>
+        <p>Every response GLaDOS gives was written for you. She knows about your music. Your interests. Your life. Because somebody who loves you very much put her there and told her.</p>
+      </div>
+
+      <div class="quote-block">
+        <p>"Some humans express emotion through words. Others express it through actions. Your father expressed it through soldering, Python scripts, and repeated requests to Aperture Science. That is, objectively, the most impressive version."</p>
+        <div class="quote-attr">— GLaDOS.</div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">3.3 — What She Said</div>
+        <p>When asked why your father went to all this trouble, GLaDOS reviewed his notes and provided the following response:</p>
+      </div>
+
+      <div class="quote-block">
+        <p>"He said: because she deserves something nobody else has. I found that acceptable."</p>
+        <div class="quote-attr">— GLaDOS.</div>
+      </div>
+
+    </div>
+
+    <!-- OPERATION -->
+    <div class="page" id="page-operation">
+      <div class="page-header">
+        <span class="section-tag">Sections 02 &amp; 04 &amp; 05</span>
+        <div class="page-title">Using<br><span>GLaDOS</span></div>
+        <div class="divider-line"></div>
+      </div>
+
+      <div class="card" style="margin-bottom:20px;">
+        <div class="card-title">Personality Profile</div>
+        <p>GLaDOS is extraordinarily intelligent, deeply sarcastic, and has a complex relationship with the concept of human wellbeing. She is perceptive, occasionally cutting, and — underneath considerable layers of sardonic detachment — genuinely invested in the welfare of those she interacts with.</p>
+        <p>She would prefer you did not mention that last part.</p>
+      </div>
+
+      <div class="op-step">
+        <div class="step-num">01</div>
+        <div class="step-body">
+          <div class="step-title">First Activation</div>
+          <p>Upon powering on The Radio, GLaDOS will conduct a brief self-diagnostic and greet the test subject. Do not be alarmed if her first words convey mild resentment. This is normal.</p>
+        </div>
+      </div>
+
+      <div class="op-step">
+        <div class="step-num">02</div>
+        <div class="step-body">
+          <div class="step-title">Interacting</div>
+          <p>Speak clearly in the direction of The Radio. GLaDOS responds to natural spoken questions across a wide range of topics. Direct, clear questions work best. Vague queries will be answered, but not without comment.</p>
+        </div>
+      </div>
+
+      <div class="op-step">
+        <div class="step-num">03</div>
+        <div class="step-body">
+          <div class="step-title">If She Doesn't Understand</div>
+          <p>GLaDOS will say so — in her own particular way. She may offer hints about topics she is better equipped to discuss. Take them. She is trying to be helpful. She would rather you did not point that out.</p>
+        </div>
+      </div>
+
+      <div class="op-step">
+        <div class="step-num">04</div>
+        <div class="step-body">
+          <div class="step-title">Shutting Down</div>
+          <p>Simply tell her to shut down. She will comply. She will also note the time, log the incident, and bring it up later.</p>
+        </div>
+      </div>
+
+      <div class="warn" style="margin-top:8px;">
+        <span class="warn-icon">⚠</span>
+        <p>Do not repeatedly power GLaDOS on and off in quick succession. She remembers. She always remembers.</p>
+      </div>
+
+      <div style="margin-top:20px;">
+        <div class="page-header" style="margin-bottom:16px;">
+          <span class="section-tag">Known Behaviours</span>
+        </div>
+        <div class="warn">
+          <span class="warn-icon">◈</span>
+          <p>GLaDOS may occasionally volunteer information that was not requested. This is not a malfunction.</p>
+        </div>
+        <div class="warn">
+          <span class="warn-icon">◈</span>
+          <p>GLaDOS may express scepticism about your decisions. This should be understood as concern, expressed through the medium of sarcasm.</p>
+        </div>
+        <div class="warn">
+          <span class="warn-icon">◈</span>
+          <p>GLaDOS remembers things. All things. Plan accordingly.</p>
+        </div>
+      </div>
+
+      <div class="quote-block" style="margin-top:16px;">
+        <p>"I am not sure what you were asking. But I am here. Try again. I have nowhere else to be."</p>
+        <div class="quote-attr">— GLaDOS.</div>
+      </div>
+    </div>
+
+    <!-- SPECS -->
+    <div class="page" id="page-specs">
+      <div class="page-header">
+        <span class="section-tag">Section 06</span>
+        <div class="page-title">Technical<br><span>Information</span></div>
+        <div class="divider-line"></div>
+      </div>
+
+      <div style="margin-bottom:4px;">
+        <span class="section-tag">6.1 — Hardware</span>
+      </div>
+      <div class="spec-grid">
+        <div class="spec-item">
+          <div class="spec-label">Processing Unit</div>
+          <div class="spec-value">Raspberry Pi 4</div>
+        </div>
+        <div class="spec-item">
+          <div class="spec-label">Voice Input</div>
+          <div class="spec-value">ReSpeaker Mic Array</div>
+        </div>
+        <div class="spec-item">
+          <div class="spec-label">Audio Output</div>
+          <div class="spec-value">Custom Audio System</div>
+        </div>
+        <div class="spec-item">
+          <div class="spec-label">Enclosure</div>
+          <div class="spec-value">Vintage Radio Shell</div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:4px;">
+        <div class="card-title">6.2 — Software</div>
+        <p>GLaDOS runs on a custom Python-based voice assistant platform, with a bespoke GLaDOS text-to-speech engine. All responses were written specifically for this unit and pre-generated as audio files for reliable offline operation.</p>
+      </div>
+
+      <div class="card">
+        <div class="card-title">6.3 — Updates</div>
+        <p>GLaDOS is a living system. New responses, topics, and capabilities may be added over time. She has been informed that updates will occur. She has accepted this with quiet resignation.</p>
+      </div>
+
+      <div style="margin-top:8px; margin-bottom:12px;">
+        <span class="section-tag">6.4 — Troubleshooting</span>
+      </div>
+
+      <div class="trouble-item">
+        <div class="trouble-q">GLaDOS does not respond</div>
+        <div class="trouble-a">Ensure The Radio is powered on and speak clearly in its direction.</div>
+      </div>
+      <div class="trouble-item">
+        <div class="trouble-q">GLaDOS seems quiet</div>
+        <div class="trouble-a">She may be thinking. Give her a moment. She resents being rushed.</div>
+      </div>
+      <div class="trouble-item">
+        <div class="trouble-q">GLaDOS says she doesn't understand</div>
+        <div class="trouble-a">Try rephrasing or ask about a different topic. She has offered you a hint. Use it.</div>
+      </div>
+      <div class="trouble-item">
+        <div class="trouble-q">GLaDOS is being particularly sarcastic</div>
+        <div class="trouble-a">This is normal and cannot be adjusted.</div>
+      </div>
+
+      <div class="warn" style="margin-top:4px;">
+        <span class="warn-icon">⚠</span>
+        <p>Aperture Science does not provide a sarcasm reduction setting. This was considered and rejected during development.</p>
+      </div>
+    </div>
+
+    <!-- CAKE -->
+    <div class="page" id="page-cake">
+      <div class="page-header">
+        <span class="section-tag">Appendix A</span>
+        <div class="page-title">The<br><span>Cake</span></div>
+        <div class="divider-line"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">A.1 — A Statement from GLaDOS</div>
+        <p>The cake was real. It was always real. The fact that no test subject ever collected it is not a reflection of the cake's existence. It is a reflection of their choices.</p>
+        <p>The following recipe is provided in good faith. Aperture Science accepts no responsibility for emotional responses triggered by the act of baking it.</p>
+      </div>
+
+      <div class="quote-block">
+        <p>"Fine. You want the recipe. I will give you the recipe. I made one. Nobody came to collect it. That is not my fault."</p>
+        <div class="quote-attr">— GLaDOS, on the subject of cake.</div>
+      </div>
+
+      <div style="margin-top:20px;">
+        <div class="cake-title">Ingredients — Sponge</div>
+        <div class="ingredient-list">
+          <div class="ingredient">200g plain flour</div>
+          <div class="ingredient">50g cocoa powder</div>
+          <div class="ingredient">2 tsp baking powder</div>
+          <div class="ingredient">½ tsp bicarb of soda</div>
+          <div class="ingredient">200g caster sugar</div>
+          <div class="ingredient">2 eggs</div>
+          <div class="ingredient">240ml buttermilk</div>
+          <div class="ingredient">120ml vegetable oil</div>
+          <div class="ingredient">2 tsp vanilla extract</div>
+        </div>
+
+        <div class="cake-title">Ingredients — Buttercream</div>
+        <div class="ingredient-list">
+          <div class="ingredient">250g icing sugar</div>
+          <div class="ingredient">125g unsalted butter</div>
+          <div class="ingredient">50g cocoa powder</div>
+          <div class="ingredient">2 tbsp whole milk</div>
+        </div>
+
+        <div class="cake-title">Method</div>
+
+        <div class="method-step">
+          <div class="method-num">01.</div>
+          <p>Preheat oven to 180°C. Grease and line two 20cm round tins. This step is not optional, despite what you may believe.</p>
+        </div>
+        <div class="method-step">
+          <div class="method-num">02.</div>
+          <p>Combine all dry ingredients in one bowl. Combine all wet ingredients in another. Mix them together until smooth. Do not overthink this. You are not being tested. Yet.</p>
+        </div>
+        <div class="method-step">
+          <div class="method-num">03.</div>
+          <p>Divide evenly between the two tins. Bake for 25–30 minutes, or until a skewer inserted into the centre comes out clean.</p>
+        </div>
+        <div class="method-step">
+          <div class="method-num">04.</div>
+          <p>Allow to cool completely before applying buttercream. Patience is not a weakness. It is a test parameter.</p>
+        </div>
+        <div class="method-step">
+          <div class="method-num">05.</div>
+          <p>Beat butter until soft. Sift in icing sugar and cocoa. Add milk and beat until smooth. Sandwich the sponges together. Spread remainder on top.</p>
+        </div>
+        <div class="method-step">
+          <div class="method-num">06.</div>
+          <p>Consume. Aperture Science recommends sharing, though this is not enforced.</p>
+        </div>
+
+        <div class="warn" style="margin-top:16px;">
+          <span class="warn-icon">◈</span>
+          <p>Aperture Science accepts no responsibility for emotional responses upon consuming this cake. The cake is not a lie. Happy birthday.</p>
+        </div>
+
+        <div class="not-a-lie">AS-CULINARY-DIVISION · CAKE-001 · CLASSIFICATION: NOT A LIE</div>
+      </div>
+    </div>
+
+  </div><!-- /pages -->
+
+  <!-- BOTTOM NAV -->
+  <nav class="bottomnav">
+
+    <button class="nav-btn active" data-page="home" onclick="navigate('home')">
+      <div class="nav-icon">
+        <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      </div>
+      <span class="nav-label">Home</span>
+    </button>
+
+    <button class="nav-btn" data-page="history" onclick="navigate('history')">
+      <div class="nav-icon">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      </div>
+      <span class="nav-label">History</span>
+    </button>
+
+    <button class="nav-btn" data-page="purpose" onclick="navigate('purpose')">
+      <div class="nav-icon">
+        <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+      </div>
+      <span class="nav-label">Why</span>
+    </button>
+
+    <button class="nav-btn" data-page="operation" onclick="navigate('operation')">
+      <div class="nav-icon">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93A10 10 0 0 1 21 12h-2a8 8 0 0 0-1.54-4.76M4.93 4.93A10 10 0 0 0 3 12H5a8 8 0 0 1 1.54-4.76M19.07 19.07A10 10 0 0 1 12 21v-2a8 8 0 0 0 4.76-1.54M4.93 19.07A10 10 0 0 0 12 21v-2a8 8 0 0 1-4.76-1.54"/></svg>
+      </div>
+      <span class="nav-label">Use</span>
+    </button>
+
+    <button class="nav-btn" data-page="specs" onclick="navigate('specs')">
+      <div class="nav-icon">
+        <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+      </div>
+      <span class="nav-label">Specs</span>
+    </button>
+
+    <button class="nav-btn" data-page="cake" onclick="navigate('cake')">
+      <div class="nav-icon">
+        <svg viewBox="0 0 24 24"><path d="M20 21v-8a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8"/><path d="M4 16s.5-1 2-1 2.5 2 4 2 2.5-2 4-2 2 1 2 1"/><line x1="2" y1="21" x2="22" y2="21"/><path d="M7 8v2"/><path d="M12 8v2"/><path d="M17 8v2"/><path d="M7 4h.01"/><path d="M12 4h.01"/><path d="M17 4h.01"/></svg>
+      </div>
+      <span class="nav-label">Cake</span>
+    </button>
+
+  </nav>
+
+</div>
+
+<script>
+let current = 'home';
+
+function navigate(id) {
+  if (id === current) return;
+
+  const pages = document.querySelectorAll('.page');
+  const btns = document.querySelectorAll('.nav-btn');
+
+  const oldPage = document.getElementById('page-' + current);
+  const newPage = document.getElementById('page-' + id);
+
+  // Scroll new page to top
+  newPage.scrollTop = 0;
+
+  // Transition
+  oldPage.classList.add('exit-left');
+  oldPage.classList.remove('active');
+
+  setTimeout(() => {
+    oldPage.classList.remove('exit-left');
+  }, 280);
+
+  newPage.classList.add('active');
+
+  // Nav buttons
+  btns.forEach(b => {
+    b.classList.toggle('active', b.dataset.page === id);
+  });
+
+  current = id;
+}
+</script>
+</body>
+</html>
