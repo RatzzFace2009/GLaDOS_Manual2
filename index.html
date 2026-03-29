@@ -779,6 +779,44 @@ body::after {
     <div class="nil">AS-CULINARY-DIVISION · CAKE-001 · CLASSIFICATION: NOT A LIE</div>
   </div>
 
+
+  <!-- COMMAND INTERFACE -->
+  <div class="page" id="page-command">
+    <span class="stag">Aperture Science</span>
+    <div class="ptitle">Command<br><span>Interface</span></div>
+    <div class="dline"></div>
+
+    <div class="card" style="margin-bottom:12px;">
+      <div class="ctitle">What Is This</div>
+      <p>The Radio can be controlled from your phone without using the wake word. Type a command and GLaDOS will respond through the Radio's speaker — and display her reply on screen so you can read it back.</p>
+      <p>This works from any device connected to the same Wi-Fi network as The Radio.</p>
+    </div>
+
+    <div class="qb" style="margin-bottom:16px;">
+      <p>"You want to type at me. Fine. I have processed considerably more text than you might expect. This is not beneath me."</p>
+      <div class="qa">— GLaDOS, on the subject of the Command Interface.</div>
+    </div>
+
+    <span class="stag" style="display:block;margin-bottom:10px;">How To Use It</span>
+    <div class="ostep"><div class="onum">01</div><div><div class="otitle">Connect to Home Wi-Fi</div><p>Your phone must be on the same network as The Radio. This will not work on mobile data or away from home.</p></div></div>
+    <div class="ostep"><div class="onum">02</div><div><div class="otitle">Open the Interface</div><p>Tap the button below. It will open in a new tab. If it doesn't load, check that The Radio is powered on.</p></div></div>
+    <div class="ostep"><div class="onum">03</div><div><div class="otitle">Type a Command</div><p>Type anything you would normally say to GLaDOS. Press Send or hit Enter. She will respond through the Radio's speaker and on screen simultaneously.</p></div></div>
+    <div class="ostep"><div class="onum">04</div><div><div class="otitle">Read Her Response</div><p>Each line GLaDOS speaks appears as a separate chat bubble, slightly staggered. If she plays an audio file — a joke, for example — the screen will show a playback indicator instead.</p></div></div>
+
+    <div class="warn" style="margin-bottom:20px;"><span class="wi">⚠</span><p>The Radio must be switched on for the Command Interface to work. GLaDOS cannot respond if she is not powered. She would like this noted.</p></div>
+
+    <!-- Big launch button -->
+    <a href="http://glados.local:5000" target="_blank" style="display:block;text-decoration:none;margin-bottom:12px;">
+      <div style="border:1px solid var(--or);background:rgba(232,101,10,0.08);padding:20px 16px;text-align:center;position:relative;cursor:pointer;">
+        <div style="position:absolute;top:-8px;left:12px;background:var(--dark);font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--or);letter-spacing:3px;padding:0 6px;">APERTURE SCIENCE</div>
+        <div style="font-family:'Oswald',sans-serif;font-size:16px;font-weight:500;color:var(--or);letter-spacing:4px;text-transform:uppercase;margin-bottom:5px;">Open Command Interface</div>
+        <div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--mg);letter-spacing:2px;">glados.local:5000</div>
+      </div>
+    </a>
+
+    <div class="warn"><span class="wi">◈</span><p>Bookmark <strong style="color:var(--off);">glados.local:5000</strong> on your phone's home screen for quick access. GLaDOS finds this appropriately efficient.</p></div>
+  </div>
+
 </div><!-- /pages -->
 
 <!-- NAV -->
@@ -819,7 +857,7 @@ body::after {
     <svg viewBox="0 0 24 24"><path d="M20 21v-8a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8"/><path d="M4 16s.5-1 2-1 2.5 2 4 2 2.5-2 4-2 2 1 2 1"/><line x1="2" y1="21" x2="22" y2="21"/><path d="M7 8v2"/><path d="M12 8v2"/><path d="M17 8v2"/><path d="M7 4h.01"/><path d="M12 4h.01"/><path d="M17 4h.01"/></svg>
     <span>Cake</span>
   </button>
-  <button class="nb" onclick="window.open('http://glados.local:5000','_blank')">
+  <button class="nb" data-page="command" onclick="go('command')">
     <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><polyline points="8 21 12 17 16 21"/><polyline points="6 9 9 12 6 15"/><line x1="12" y1="12" x2="16" y2="12"/></svg>
     <span>Command</span>
   </button>
