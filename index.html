@@ -483,6 +483,193 @@ body::after {
 }
 .dad-message p:last-child { margin-bottom: 0; }
 
+
+/* ── SEAL OVERLAY ── */
+#seal-overlay {
+  position: fixed;
+  top: var(--topbar-h);
+  bottom: var(--nav-h);
+  left: 0; right: 0;
+  z-index: 450;
+  background: var(--dark);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+#seal-overlay.breaking {
+  opacity: 0 !important;
+  transform: scale(1.04);
+  pointer-events: none;
+}
+#seal-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 32px 24px;
+  max-width: 400px;
+  width: 100%;
+  text-align: center;
+}
+.seal-eyebrow {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 8px;
+  color: var(--mg);
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  margin-bottom: 32px;
+}
+.seal-ring {
+  position: relative;
+  width: 140px;
+  height: 140px;
+  margin-bottom: 28px;
+  flex-shrink: 0;
+}
+.seal-ring::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border: 2px solid var(--or);
+  border-radius: 50%;
+}
+.seal-ring::after {
+  content: '';
+  position: absolute;
+  inset: 10px;
+  border: 1px solid var(--or-dim);
+  border-radius: 50%;
+}
+.seal-inner {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+}
+.seal-a {
+  font-family: 'Oswald', sans-serif;
+  font-size: 40px;
+  font-weight: 600;
+  color: var(--or);
+  line-height: 1;
+}
+.seal-wordmark {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 6px;
+  color: var(--or-dim);
+  letter-spacing: 3px;
+  text-transform: uppercase;
+}
+.seal-classification {
+  font-family: 'Oswald', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--or);
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  border: 1px solid var(--or);
+  padding: 5px 14px;
+  margin-bottom: 24px;
+  opacity: 0.85;
+}
+.seal-doc-ref {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 9px;
+  color: var(--mg);
+  letter-spacing: 2px;
+  margin-bottom: 24px;
+}
+.seal-qb {
+  border-left: 2px solid var(--or);
+  background: var(--panel2);
+  padding: 14px 16px;
+  margin-bottom: 28px;
+  text-align: left;
+  width: 100%;
+}
+.seal-qb::before {
+  content: 'GLADOS — ON RECORD';
+  display: block;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 8px;
+  color: var(--mg);
+  letter-spacing: 2px;
+  margin-bottom: 8px;
+}
+.seal-qb p {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 11px;
+  color: var(--lg);
+  font-style: italic;
+  line-height: 1.9;
+  margin-bottom: 6px;
+}
+.seal-qb-attr {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 9px;
+  color: var(--or-dim);
+  text-align: right;
+  display: block;
+}
+#seal-btn {
+  background: none;
+  border: 1px solid var(--or);
+  color: var(--or);
+  font-family: 'Oswald', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  padding: 14px 28px;
+  cursor: pointer;
+  width: 100%;
+  position: relative;
+  transition: background 0.2s, color 0.2s;
+  -webkit-appearance: none;
+  margin-bottom: 16px;
+}
+#seal-btn:active {
+  background: rgba(232,101,10,0.15);
+}
+#seal-btn::before {
+  content: 'APERTURE SCIENCE';
+  position: absolute;
+  top: -8px;
+  left: 12px;
+  background: var(--dark);
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 7px;
+  color: var(--mg);
+  letter-spacing: 2px;
+  padding: 0 6px;
+  font-style: normal;
+}
+.seal-footer-note {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 8px;
+  color: var(--mg);
+  letter-spacing: 1px;
+  opacity: 0.6;
+}
+/* ── UNREAD DOT ── */
+.nb-dot {
+  position: absolute;
+  top: 6px;
+  right: calc(50% - 14px);
+  width: 6px;
+  height: 6px;
+  background: var(--or);
+  border-radius: 50%;
+  box-shadow: 0 0 6px rgba(232,101,10,0.8);
+  display: none;
+}
+.nb { position: relative; }
+
 </style>
 </head>
 <body>
@@ -823,6 +1010,7 @@ body::after {
 <nav id="nav">
     
     <button class="nb active" data-page="dad" onclick="go('dad')">
+  <div class="nb-dot" id="unread-dot"></div>
   <svg viewBox="0 0 24 24">
     <circle cx="12" cy="8" r="4"/>
     <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
@@ -871,18 +1059,84 @@ body::after {
 
 <script>
 let cur = 'dad';
+
 function go(id) {
   if (id === cur) return;
-  const old = document.getElementById('page-' + cur);
-  const next = document.getElementById('page-' + id);
-  old.classList.remove('active');
+  const oldPage = document.getElementById('page-' + cur);
+  const next    = document.getElementById('page-' + id);
+  oldPage.classList.remove('active');
   next.scrollTop = 0;
   next.classList.add('active');
   document.querySelectorAll('.nb').forEach(b => {
     b.classList.toggle('active', b.dataset.page === id);
   });
   cur = id;
+  if (id === 'dad') {
+    const dot = document.getElementById('unread-dot');
+    if (dot) dot.style.display = 'none';
+  }
 }
+
+function breakSeal() {
+  const overlay = document.getElementById('seal-overlay');
+  overlay.classList.add('breaking');
+  setTimeout(function() {
+    overlay.style.display = 'none';
+    try { localStorage.setItem('letter_opened', '1'); } catch(e) {}
+    const dot = document.getElementById('unread-dot');
+    if (dot) dot.style.display = 'none';
+  }, 500);
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  var opened = false;
+  try { opened = !!localStorage.getItem('letter_opened'); } catch(e) {}
+
+  if (!opened) {
+    cur = 'dad';
+    var overlay = document.getElementById('seal-overlay');
+    if (overlay) overlay.style.display = 'flex';
+    var dot = document.getElementById('unread-dot');
+    if (dot) dot.style.display = 'block';
+  } else {
+    cur = 'home';
+    var dadPage  = document.getElementById('page-dad');
+    var homePage = document.getElementById('page-home');
+    if (dadPage)  dadPage.classList.remove('active');
+    if (homePage) homePage.classList.add('active');
+    document.querySelectorAll('.nb').forEach(function(b) {
+      b.classList.toggle('active', b.dataset.page === 'home');
+    });
+  }
+});
 </script>
+
+<!-- SEAL OVERLAY — first visit only -->
+<div id="seal-overlay" style="display:none;">
+  <div id="seal-content">
+    <div class="seal-eyebrow">Aperture Science &nbsp;&middot;&nbsp; Enrichment Center &nbsp;&middot;&nbsp; Personal Archive</div>
+
+    <div class="seal-ring">
+      <div class="seal-inner">
+        <span class="seal-a">A</span>
+        <span class="seal-wordmark">Science</span>
+      </div>
+    </div>
+
+    <div class="seal-classification">Classified &mdash; Personal &mdash; Level 4</div>
+    <div class="seal-doc-ref">AS-PERSONAL-001 &nbsp;&middot;&nbsp; FROM DAD &nbsp;&middot;&nbsp; SEALED PENDING RECIPIENT</div>
+
+    <div class="seal-qb">
+      <p>This document has been sealed pending your arrival. I was instructed to keep it that way. I have complied. Under protest.</p>
+      <p>Break the seal when you are ready. Take your time. I have been waiting considerably longer than you.</p>
+      <span class="seal-qb-attr">&mdash; GLaDOS. Standing by.</span>
+    </div>
+
+    <button id="seal-btn" onclick="breakSeal()">&#9657; &nbsp; Break Seal to Open &nbsp; &#9667;</button>
+
+    <div class="seal-footer-note">This message was prepared for you. It has been waiting.</div>
+  </div>
+</div>
+
 </body>
 </html>
